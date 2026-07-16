@@ -1,4 +1,7 @@
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./openapi.json');
+
 const app = express();
 const port = 3000;
 
@@ -16,9 +19,8 @@ function addTask(title, done) {
     return taskList;
 }
 
-function sendError(res, errorMessage) {
-    res.status(400);
-    res.send({ "error": errorMessage });
+function removeTaskInPos(pos) {
+    taskList.splice(index, 1);
 }
 
 function positionOfIdInList(id) {
@@ -29,6 +31,34 @@ function positionOfIdInList(id) {
     }
     return -1;
 }
+
+function writeDone(index, done) {
+    if (done) {
+        taskList[index].title = done;
+    }
+}
+
+function writeTitle(index, title) {
+    if (title) {
+        taskList[index].title = title;
+    }
+}
+
+function sendError(res, errorMessage) {
+    res.status(400);
+    res.send({ "error": errorMessage });
+}
+
+function unknowId(res) {
+    res.status(400);
+    res.send("Unknown id");
+}
+
+function resNoContent(res) {
+    res.status(204);
+    res.send("No content");
+}
+
 
 addTask("Clean the bathroom", true);
 addTask("Cook chicken nuggets", false);
@@ -74,30 +104,39 @@ app.put('/tasks/:id', (req, res) => {
     const done = req.body.done 
     
     if (!title || !done) {
-        res.status(404)
-        res.send("Unknown id")
+        sendError(res, "There's no title or done")
         return;
     }
     
     let pos = positionOfIdInList(id);
+    
     if (pos === -1) {
-        sendError(res, "Unknown id task");
+        unknowId(res, "Unknown id task");
         return;
     }
-    if (title) {
-        taskList[i].title = title
-    }
-    
-    if (done) {
-        taskList[i].title = done
-    }
+    writeTitle(pos, title);
+    writeDone(pos, done);
     res.status(204);
     res.json(taskList[i]);
 });
 
 app.delete('/tasks:id', (req, res) => {
+    var id = req.params.id 
+    let pos = positionOfIdInList(id);
+    if (pos === -1) {
+        unknowId(res, "Unknown id task");
+        return;
+    }
+
+    removeTaskInPos(pos)
+    resNoContent(res);
+
 });
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
 }); 
+
+
+
+
