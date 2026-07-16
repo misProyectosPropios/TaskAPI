@@ -2,24 +2,28 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
+app.use(express.json());
 
-taskList = [
-    { 
-        "id": 1, 
-        "title" : "Clean the bathroom",
-        "done": true,
-    },
-    { 
-        "id": 3, 
-        "title" : "Cook chicken nuggets",
-        "done": false,
-    },
-    { 
-        "id": 2, 
-        "title" : "Study computability",
-        "done": false,
-    },
-]
+taskList = []
+
+function addTask(title, done) {
+    let id = taskList.length;
+    taskList.push({
+        "id": taskList.length,
+        "title": title,
+        "done": done
+    })
+    return taskList;
+}
+
+function sendError(res, errorMessage) {
+    res.status(400);
+    res.send({ "error": errorMessage });
+}
+
+addTask("Clean the bathroom", true);
+addTask("Cook chicken nuggets", false);
+addTask("Study computability", false);
 
 app.get('/', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
@@ -39,14 +43,23 @@ app.get('/tasks/:id', (req, res) => {
             return
         }
     }
-    res.status(404);
-    res.send({ "error": `Task ${id} not found` });
+    sendError(res, `Task ${id} not found`)
 });
 
 app.get('/health', (req, res) => {
     res.json({ 'status' : "ok"});
 });
 
+app.post('/tasks', (req, res) => {
+    const title = req.body.title    
+    if (!title) {
+        sendError(res, `There's no title in the body of the request`);
+        return;
+    }
+    addTask(title, false);
+    res.status(201);
+    res.json({"status": "Created"});
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
