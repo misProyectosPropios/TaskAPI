@@ -21,6 +21,15 @@ function sendError(res, errorMessage) {
     res.send({ "error": errorMessage });
 }
 
+function positionOfIdInList(id) {
+    for (let i = 0; i < taskList.length; i++) {
+        if (taskList[i].id == id) {
+           return i; 
+        }
+    }
+    return -1;
+}
+
 addTask("Clean the bathroom", true);
 addTask("Cook chicken nuggets", false);
 addTask("Study computability", false);
@@ -36,12 +45,11 @@ app.get('/tasks', (req, res) => {
 
 app.get('/tasks/:id', (req, res) => {
     var id = req.params.id 
-    for (let i = 0; i < taskList.length; i++) {
-        if (taskList[i].id == id) {
-            res.status(200);
-            res.send(taskList[i]);
-            return
-        }
+    let pos = positionOfIdInList(id);
+    if (pos !== -1) {
+        res.status(200);
+        res.send(taskList[i]);
+        return
     }
     sendError(res, `Task ${id} not found`)
 });
@@ -60,6 +68,35 @@ app.post('/tasks', (req, res) => {
     res.status(201);
     res.json({"status": "Created"});
 })
+
+app.put('/tasks/:id', (req, res) => {
+    const title = req.body.title
+    const done = req.body.done 
+    
+    if (!title || !done) {
+        res.status(404)
+        res.send("Unknown id")
+        return;
+    }
+    
+    let pos = positionOfIdInList(id);
+    if (pos === -1) {
+        sendError(res, "Unknown id task");
+        return;
+    }
+    if (title) {
+        taskList[i].title = title
+    }
+    
+    if (done) {
+        taskList[i].title = done
+    }
+    res.status(204);
+    res.json(taskList[i]);
+});
+
+app.delete('/tasks:id', (req, res) => {
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
