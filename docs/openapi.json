@@ -1,0 +1,234 @@
+{
+    "openapi": "3.0.4",
+    "info": {
+        "title": "Task API",
+        "description": "A backend for a CRUD of tasks to-do",
+        "version": "0.1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Development server. Used for testing purposes"
+        }
+    ],
+    "paths": {
+        "/tasks": {
+            "get": {
+                "summary": "Returns a list of all the tasks.",
+                "description": "Returns an array of task objects",
+                "responses": {
+                    "200": {
+                        "description": "An array of tasks",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Task"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add a task to the list with an auto-generated id and with done in false",
+                "description": "Adds a task to the list if it's able to get the title. If not, return a problem. Otherwise, it creates and returns a succesfull response",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "A new task created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Status"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "An error as there was no title sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/{id}": {
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "The task id",
+                    "schema": {
+                        "type": "integer"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Returns a task with that id",
+                "description": "Returns a task with that id. If there's no task with such id, returns an error",
+                "responses": {
+                    "200": {
+                        "description": "A task",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Task"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "An error as there was no task with that id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Updates the task with the given values passed",
+                "description": "Updates the title or done attributes of the task. They have to be passed in the json with the same name as the attributes",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaskUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "A confirmation that it was succesfully updated the content of the task"
+                    },
+                    "404": {
+                        "description": "An error as there was no task with that id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "An error as there was no attribute with title neither done",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Deletes the task with that id.",
+                "description": "Deletes the task with that id if it exists. If it doesn't, return a message of error",
+                "responses": {
+                    "204": {
+                        "description": "A confirmation that it was succesfully deleted"
+                    },
+                    "404": {
+                        "description": "An error as there was no task with that id",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Task": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Buy milk"
+                    },
+                    "done": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                }
+            },
+            "TaskInput": {
+                "type": "object",
+                "required": [
+                    "title"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Buy milk"
+                    }
+                }
+            },
+            "TaskUpdate": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Buy bread"
+                    },
+                    "done": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Task not found"
+                    }
+                }
+            },
+            "Status": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "Created"
+                    }
+                }
+            }
+        }
+    }
+}
