@@ -36,12 +36,15 @@ function positionOfIdInList(id) {
 
 function writeDone(index, done) {
     if (done) {
-        taskList[index].title = done;
+        taskList[index].done = done;
     }
 }
 
 function writeTitle(index, title) {
+    
     if (title) {
+        console.log("Writing title")
+        console.log(title)
         taskList[index].title = title;
     }
 }
@@ -82,7 +85,7 @@ app.get('/tasks/:id', (req, res) => {
     let pos = positionOfIdInList(id);
     if (pos !== -1) {
         res.status(200);
-        res.send(taskList[i]);
+        res.send(taskList[pos]);
         return
     }
     res.status(404);
@@ -94,6 +97,7 @@ app.get('/health', (req, res) => {
 });
 
 app.post('/tasks', (req, res) => {
+    
     const title = req.body.title    
     if (!title) {
         sendError(res, `There's no title in the body of the request`);
@@ -105,9 +109,11 @@ app.post('/tasks', (req, res) => {
 })
 
 app.put('/tasks/:id', (req, res) => {
+    const id = req.params.id 
     const title = req.body.title
     const done = req.body.done 
-    
+    console.log(title)
+    console.log(done)
     if (!title || !done) {
         sendError(res, "There's no title or done")
         return;
@@ -122,7 +128,7 @@ app.put('/tasks/:id', (req, res) => {
     writeTitle(pos, title);
     writeDone(pos, done);
     res.status(204);
-    res.json(taskList[i]);
+    res.json(taskList[pos]);
 });
 
 app.delete('/tasks/:id', (req, res) => {
