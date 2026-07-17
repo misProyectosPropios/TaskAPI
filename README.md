@@ -23,6 +23,10 @@ After starting the server, open the following URL in your browser:
 http://localhost:3000/api-docs
 ```
 
+It will look like this:
+
+![swagger image](./assets/swagger-ui.png)
+
 ## Prerequisites
 
 - Node.js
