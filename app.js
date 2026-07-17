@@ -112,9 +112,7 @@ app.put('/tasks/:id', (req, res) => {
     const id = req.params.id 
     const title = req.body.title
     const done = req.body.done 
-    console.log(title)
-    console.log(done)
-    if (!title || !done) {
+    if (title === undefined && done === undefined) {
         sendError(res, "There's no title or done")
         return;
     }
