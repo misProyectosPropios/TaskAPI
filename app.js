@@ -1,11 +1,13 @@
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./openapi.json');
+const swaggerDocument = require('./docs/openapi.json');
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 taskList = []
 
@@ -20,7 +22,7 @@ function addTask(title, done) {
 }
 
 function removeTaskInPos(pos) {
-    taskList.splice(index, 1);
+    taskList.splice(pos, 1);
 }
 
 function positionOfIdInList(id) {
@@ -44,19 +46,21 @@ function writeTitle(index, title) {
     }
 }
 
+function sendResponse(res, status, send) {
+    res.status(status);
+    res.send(send);
+}
+
 function sendError(res, errorMessage) {
-    res.status(400);
-    res.send({ "error": errorMessage });
+    sendResponse(res, 400, { "error": errorMessage })
 }
 
 function unknowId(res) {
-    res.status(400);
-    res.send("Unknown id");
+    sendResponse(res, 404, "Unknown id")
 }
 
 function resNoContent(res) {
-    res.status(204);
-    res.send("No content");
+    sendResponse(res, 204, "No content")
 }
 
 
@@ -81,7 +85,8 @@ app.get('/tasks/:id', (req, res) => {
         res.send(taskList[i]);
         return
     }
-    sendError(res, `Task ${id} not found`)
+    res.status(404);
+    res.json({ "error": `Task ${id} not found` });
 });
 
 app.get('/health', (req, res) => {
@@ -120,7 +125,7 @@ app.put('/tasks/:id', (req, res) => {
     res.json(taskList[i]);
 });
 
-app.delete('/tasks:id', (req, res) => {
+app.delete('/tasks/:id', (req, res) => {
     var id = req.params.id 
     let pos = positionOfIdInList(id);
     if (pos === -1) {
